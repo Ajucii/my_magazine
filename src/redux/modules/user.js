@@ -47,26 +47,45 @@ const loginAction = (nickname, pwd, imageUrl = "") => {
                 nickname: nickname,
                 password: pwd,
             }
-
         }).then((response) => {
-            sessionStorage.setItem('token', response.data.data.token);
+
             const user_info = {
                 nickname: response.data.data.nickname,
                 isAdmin: response.data.data.isAdmin,
                 userProfile: imageUrl,
             }
 
-            dispatch(setUser(user_info));
-            dispatch(postActions.getPostBK());
-            history.push('/');
+            const token = response.data.data.token;
+            console.log(token);
 
-        })
-            .catch((err) => {
-                window.alert("아이디 혹은 비밀번호가 틀렸습니다.")
+            sessionStorage.setItem('token', response.data.data.token);
+
+            dispatch(setUser(user_info));
+            console.log(user_info);
+
+            axios({
+                method: 'get',
+                url: 'http://junehan-test.shop/api/posts',
+                headers: {
+                    authorization: `Bearer ${token}`,
+                }
+
+            }).then((response) => {
+                dispatch(postActions.setPost(response.data.data));
+
+                history.push('/');
+
+            }).catch((err) => {
                 console.log(err.message);
             })
+        }).catch((err) => {
+            window.alert("아이디 혹은 비밀번호가 틀렸습니다.")
+            console.log(err.message);
+        })
     }
 }
+
+
 
 const signupAction = (nickname, pwd, pwd2) => {
     return function (dispatch, getState, { history }) {
@@ -83,7 +102,7 @@ const signupAction = (nickname, pwd, pwd2) => {
         }).then((response) => {
 
             console.log("회원가입 성공");
-            // dispatch(loginAction(nickname, pwd))
+            dispatch(loginAction(nickname, pwd))
             history.push('/');
 
         }).catch((err) => {
@@ -126,10 +145,7 @@ const logOutBK = () => {
     return function (dispatch, getState, { history }) {
         sessionStorage.removeItem('token');
         dispatch(logOut());
-        //replace. 지금 있는 페이지와 바꿔치기하겠다는것. 뒤로가기 해도 원래페이지가 안나옴.
-        dispatch(postActions.getPostBK())
         history.replace('/');
-
     }
 }
 
@@ -140,7 +156,6 @@ export default handleActions({
         // setCookie("is_login", "success");
         // createAction을 사용할 경우 받아온 action에 payload를 중간에 거쳐야 인자로 넘겨준 값을 받아올 수 있다.
         draft.user_info = action.payload.user;
-        console.log(action.payload.user);
         draft.is_login = true;
         // draft.p_loading = false;
     }),

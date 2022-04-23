@@ -57,17 +57,17 @@ const Signup = () => {
                     </InputBox>
 
                     <InputBox>
-                        <p>닉네임</p><br></br>
+                        <p>아이디</p><br></br>
                         {errors && <span>{errors?.nickname?.message}</span>}
                         <input
                             type="text"
-                            placeholder="닉네임을 입력해주세요"
+                            placeholder="아이디를 입력해주세요"
                             {...register("nickname",
                                 {
-                                    required: "닉네임은 필수입니다.",
+                                    required: "아이디는 필수입니다.",
                                     pattern: {
                                         value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{3,}$/,
-                                        message: "3자 이상의 대소문자 1개, 숫자 1개 포함해주세요",
+                                        message: "아이디는 대,소문자 각각 1개, 숫자 1개가 포함되어야 합니다.",
                                     }
                                 })}></input>
                     </InputBox>
@@ -83,7 +83,7 @@ const Signup = () => {
                                     required: "비밀번호는 필수입니다.",
                                     pattern: {
                                         value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{6,}$/,
-                                        message: "6자 이상의 대소문자 1개, 숫자 1개 포함해주세요",
+                                        message: "비밀번호는 대,소문자 각각 1개, 숫자 1개, 6자 이상으로 만들어주세요",
                                     }
                                 })}></input>
                     </InputBox>
@@ -99,7 +99,7 @@ const Signup = () => {
                                     required: "",
                                     pattern: {
                                         value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{6,}$/,
-                                        message: "6자 이상의 대소문자 1개, 숫자 1개 포함해주세요",
+                                        message: "",
                                     }
                                 })}></input>
                     </InputBox>

@@ -1,13 +1,19 @@
-import { useSelector } from "react-redux";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import Footer from "../components/Footer";
 import Post from "../components/post/Post";
 import { Grid } from "../elements";
+import { actionCreators as postActions } from "../redux/modules/post";
 
 
 const PostList = (props) => {
 
     const post_list = useSelector((state) => state.post.list);
+    console.log(post_list);
     const user_info = useSelector((state) => state.user.user_info);
+    const dispatch = useDispatch();
+
+
 
 
 
@@ -22,7 +28,7 @@ const PostList = (props) => {
                                     bg="#ffffff"
                                     margin="8px 0px"
                                     key={p.postId}>
-                                    <Post {...p} index={index} is_me is_like />
+                                    <Post {...p} is_me />
                                 </Grid>
                             )
                         } else {
@@ -31,7 +37,7 @@ const PostList = (props) => {
                                     bg="#ffffff"
                                     margin="8px 0px"
                                     key={p.postId}>
-                                    <Post {...p} index={index} is_like />
+                                    <Post {...p} />
                                 </Grid>
                             )
                         }

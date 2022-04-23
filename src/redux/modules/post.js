@@ -36,44 +36,28 @@ const initialState = {
 const initialPost = {
     image_url: "http://i.postimg.cc/Zq3qBrgR/june.jpg",
     content: "",
-    commentCnt: null,
-    likeCnt: null,
+    commentCnt: 0,
+    likeCnt: 0,
     isLike: false,
-    created: moment().format("YYYY-MM-DD hh:mm:ss"),
+    createdAt: moment().format("YYYY-MM-DD hh:mm:ss"),
     postId: null,
 }
 
 
 const getPostBK = () => {
     return function (dispatch, getState, { history }) {
-        const log = sessionStorage.getItem('token') ? true : false
-        console.log("login : ", log)
-        if (log) {
-            axios({
-                method: 'get',
-                url: 'http://junehan-test.shop/api/posts',
-                headers: {
-                    authorization: `Bearer ${token}`,
-                }
-            }).then((response) => {
-                dispatch(setPost(response.data.data))
-            }).catch((err) => {
-                console.log(err.message);
-            })
-        }
-        else {
-            axios({
-                method: 'get',
-                url: 'http://junehan-test.shop/api/posts',
-                data: {
 
-                }
-            }).then((response) => {
-                dispatch(setPost(response.data.data))
-            }).catch((err) => {
-                console.log(err.message);
-            })
-        }
+        axios({
+            method: 'get',
+            url: 'http://junehan-test.shop/api/posts',
+            headers: {
+                authorization: `Bearer ${token}`,
+            }
+        }).then((response) => {
+            dispatch(setPost(response.data.data))
+        }).catch((err) => {
+            console.log(err.message);
+        })
     }
 }
 
@@ -85,6 +69,7 @@ const getOnePostBK = (post_id) => {
         axios({
             method: 'get',
             url: `http://junehan-test.shop/api/posts/${post_id}`,
+
             headers: {
                 authorization: `Bearer ${token}`,
             }
@@ -104,19 +89,19 @@ const addPostBK = (contents = "", layout = "top") => {
         const _user = getState().user.user_info;
         console.log(_user);
         const userInfo = {
-            userNickname: _user.nickname,
+            nickname: _user.nickname,
             userProfile: _user.userProfile,
         };
         const _post = {
             ...initialPost,
             layout: layout,
             content: contents,
-            created: moment().format("YYYY-MM-DD hh:mm:ss"),
         };
 
         const _image = getState().image.preview;
+
         const _upload = storage
-            .ref(`images/${userInfo.userId}_${new Date().getTime()}`)
+            .ref(`images/${userInfo.nickname}_${new Date().getTime()}`)
             .putString(_image, "data_url");
 
         _upload.then((snapshot) => {
@@ -126,22 +111,20 @@ const addPostBK = (contents = "", layout = "top") => {
                     return url;
                 })
                 .then((url) => {
-                    let post = { ..._post, title: "황연준짱", imageUrl: url };
                     axios({
                         method: 'post',
                         url: 'http://junehan-test.shop/api/posts',
                         headers: {
                             authorization: `Bearer ${token}`,
                         },
-                        data: post
-
+                        data: { ...userInfo, ..._post, imageUrl: url, title: "타이틀1" }
 
                     }).then((response) => {
+                        let post = { ...userInfo, ..._post, postId: response.data.data.id, title: "", imageUrl: url };
                         dispatch(addPost(post));
                         dispatch(imageActions.setPreview(null));
                         history.replace("/");
                     })
-
                 })
                 .catch((error) => {
                     alert("IMAGE UPLOAD FAILED");

@@ -12,8 +12,10 @@ const Login = (props) => {
     const { register, formState: { errors, isValid, isDirty }, handleSubmit } = useForm({ mode: "onChange" });
 
     const onSubmit = ({ nickname, password }) => {
+
         console.log(nickname, password);
         dispatch(userActions.loginAction(nickname, password));
+
     }
 
 
@@ -24,14 +26,14 @@ const Login = (props) => {
 
                 <Grid padding="16px 0px">
                     <InputBox>
-                        <p>닉네임</p><br></br>
+                        <p>아이디</p><br></br>
                         {errors && <span>{errors?.nickname?.message}</span>}
                         <input
                             type="text"
-                            placeholder="닉네임을 입력해주세요"
+                            placeholder="아이디를 입력해주세요"
                             {...register("nickname",
                                 {
-                                    required: "닉네임을 입력해주세요.",
+                                    required: "아이디를 입력해주세요.",
                                 }
                             )}></input>
                     </InputBox>
