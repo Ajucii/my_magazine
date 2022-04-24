@@ -12,21 +12,21 @@ const InfinityScroll = (props) => {
         if (loading) {
             return;
         }
-
         const { innerHeight } = window;
         const { scrollHeight } = document.body;
 
         const scrollTop = (document.documentElement && document.documentElement.scrollTop) || document.body.scrollTop;
 
-        if (scrollHeight - innerHeight - scrollTop < 200) {
+        if (scrollHeight - innerHeight - scrollTop < 100) {
             callNext();
         }
-    }, 300);
+    }, 700);
 
     const handleScroll = useCallback(_handleScroll, [loading]);
 
-    useEffect(() => {
 
+    // 처음 로드가 됐을 때 이벤트를 달아주기
+    useEffect(() => {
         if (loading) {
             return;
         }
@@ -34,9 +34,10 @@ const InfinityScroll = (props) => {
         if (is_next) {
             window.addEventListener("scroll", handleScroll);
         } else {
+
             window.removeEventListener("scroll", handleScroll);
         }
-
+        // 함수형 컴포넌트에서 구독취소하는 방법. (클린업) 함수형 컴포넌트가 화면에서 사라질때 return에 있는 구문이 실행.
         return () => window.removeEventListener("scroll", handleScroll)
     }, [is_next, loading]);
 

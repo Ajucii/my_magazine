@@ -3,7 +3,6 @@ import CardHeader from "@mui/material/CardHeader";
 import Avatar from "@mui/material/Avatar";
 import { useSelector, useDispatch } from "react-redux";
 import { history } from "../../redux/configStore";
-import { useEffect, useState } from "react";
 import like_icon from "../../like_icon.png";
 import unlike_icon from "../../unlike_icon.png";
 import { actionCreators as postActions } from "../../redux/modules/post"

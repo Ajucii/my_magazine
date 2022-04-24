@@ -12,9 +12,8 @@ import PostWrite from "../pages/PostWrite";
 import PostDetail from "../pages/PostDetail";
 import { Grid } from "../elements/index";
 import { useDispatch, useSelector } from "react-redux";
-
-import { actionCreators as userActions } from "../redux/modules/user";
 import { actionCreators as postActions } from "../redux/modules/post";
+import { actionCreators as userActions } from "../redux/modules/user";
 import { useEffect } from "react";
 import Spinner from "../elements/Spinner";
 
@@ -26,7 +25,6 @@ function App() {
   const p_loading = useSelector(state => state.post.p_loading);
 
   useEffect(() => {
-
     dispatch(postActions.getPostBK());
 
     if (is_session) {

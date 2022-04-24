@@ -21,7 +21,7 @@ const LIKE_POST = "LIKE_POST";
 const LOADING = "LOADING";
 const P_LOADING = "P_LOADING"
 
-const setPost = createAction(SET_POST, (post_list) => ({ post_list }));
+const setPost = createAction(SET_POST, (post_list, paging) => ({ post_list, paging }));
 const addPost = createAction(ADD_POST, (post, layout) => ({ post, layout }));
 const editPost = createAction(EDIT_POST, (post_id, post) => ({ post_id, post }));
 const deletePost = createAction(DELETE_POST, (post_id) => ({ post_id }));
@@ -33,10 +33,7 @@ const token = sessionStorage.getItem('token');
 
 const initialState = {
     list: [],
-    // start: 시작점 정보, next: 다음 목록이 있나없나(다음 가져올 것의 정보, size: 몇개 가지고 올거냐
-    paging: { start: null, next: null, size: 2 },
-
-    //지금 가지고 오고 있는 중이니
+    paging: { start: 1, next: true, size: 2 },
     is_loading: false,
     p_loading: false,
 }
@@ -52,48 +49,63 @@ const initialPost = {
 }
 
 
-const getPostBK = (start = null, size = 3) => {
+const getPostBK = (start = 1, size = 2) => {
     return function (dispatch, getState, { history }) {
 
-        const token = isLogin();
         let _paging = getState().post.paging;
 
-        // if (_paging.start && !_paging.next) {
-        //     return;
-        // }
+        if (_paging.next === false) {
+            console.log("다음꺼없어");
+            return;
+        }
 
+        const token = isLogin();
         dispatch(loading(true));
-
-        // if(start){
-        // 쿼리가 지금 url이네!
-        // }
 
         if (token) {
             axios({
                 method: 'get',
-                url: `http://junehan-test.shop/api/posts`,
+                url: `http://junehan-test.shop/api/posts?page=${start}`,
                 headers: {
                     authorization: `Bearer ${token}`,
                 }
             }).then((response) => {
-                dispatch(setPost(response.data.data))
+
+                let post_list = response.data.data;
+
+                let paging = {
+                    start: ++start,
+                    next: post_list.length < 3 ? false : true,
+                    size: size,
+                }
+
+                dispatch(setPost(post_list, paging));
+
             }).catch((err) => {
                 console.log(err.message);
             })
         } else {
             axios({
                 method: 'get',
-                url: `http://junehan-test.shop/api/posts`,
+                url: `http://junehan-test.shop/api/posts?page=${start}`,
                 data: {}
 
             }).then((response) => {
-                dispatch(setPost(response.data.data))
+
+                let post_list = response.data.data;
+
+                let paging = {
+                    start: start++,
+                    next: post_list.length < 3 ? false : true,
+                    size: size,
+                }
+
+                dispatch(setPost(post_list, paging));
+
             }).catch((err) => {
                 console.log(err.message);
             })
         }
-
-
     }
 }
 
@@ -324,8 +336,17 @@ const likePostBK = (post_id = null) => {
 export default handleActions(
     {
         [SET_POST]: (state, action) => produce(state, (draft) => {
-            console.log("SET POST : ", action.payload.post_list);
-            draft.list = action.payload.post_list;
+
+            draft.list.push(...action.payload.post_list);
+            draft.paging = action.payload.paging;
+
+
+            // draft.list = action.payload.post_list;
+
+            draft.is_loading = false;
+
+
+
         }),
 
         [ADD_POST]: (state, action) => produce(state, (draft) => {
