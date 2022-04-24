@@ -16,13 +16,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { actionCreators as userActions } from "../redux/modules/user";
 import { actionCreators as postActions } from "../redux/modules/post";
 import { useEffect } from "react";
+import Spinner from "../elements/Spinner";
 
 
 function App() {
 
   const dispatch = useDispatch();
   const is_session = sessionStorage.getItem('token') ? true : false;
-  const is_login = useSelector((state) => state.user.is_login);
   const p_loading = useSelector(state => state.post.p_loading);
 
   useEffect(() => {
@@ -37,7 +37,7 @@ function App() {
 
   return (
     <>
-      {!p_loading}
+      {!p_loading || <Spinner />}
 
       <Wrapper>
         <Grid width="100%" maxWidth="500px" margin="auto" bg="white" minHeight="100vh">

@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 const Button = (props) => {
 
-    const { width, height, text, _onClick, children, is_footer, margin, disabled, position, zIndex } = props;
+    const { width, height, text, _onClick, children, is_footer, is_edit, margin, disabled, position, zIndex, verticalAlign } = props;
 
     const styles = {
         width: width,
@@ -11,6 +11,7 @@ const Button = (props) => {
         margin: margin,
         position: position,
         zIndex: zIndex,
+        verticalAlign: verticalAlign,
     }
 
     if (disabled) {
@@ -25,10 +26,19 @@ const Button = (props) => {
         )
     }
 
+    if (is_edit) {
+        return (
+            <EditButton {...styles} onClick={_onClick}>{text ? text : children}</EditButton>
+        )
+    }
+
+
     return (
         <ElButton {...styles} onClick={_onClick}>{text ? text : children}</ElButton>
     )
 }
+
+
 
 Button.defaultProps = {
     text: false,
@@ -43,6 +53,22 @@ Button.defaultProps = {
     zIndex: null,
 }
 
+const EditButton = styled.button`
+    
+    width : ${(props) => props.width};
+    height : ${(props) => props.height};
+    background-color: #212121;
+    color : #ffffff;
+    padding : 8px 0px;
+    box-sizing: border-box;
+    border : none;
+    ${(props) => (props.margin ? `margin: ${props.margin};` : '')};
+    ${(props) => (props.position ? `position: ${props.position};` : '')};
+    ${(props) => (props.zIndex ? `z-index: ${props.zIndex};` : '')};
+    cursor: pointer;
+
+`;
+
 const ElButton = styled.button`
 
     width : ${(props) => props.width};
@@ -51,12 +77,14 @@ const ElButton = styled.button`
     color : #ffffff;
     padding : 12px 0px;
     box-sizing: border-box;
+    vertical-align: middle;
     border : none;
     ${(props) => (props.margin ? `margin: ${props.margin};` : '')};
     ${(props) => (props.position ? `position: ${props.position};` : '')};
     ${(props) => (props.zIndex ? `z-index: ${props.zIndex};` : '')};
     cursor: pointer;
 `;
+
 
 const DisabledButton = styled.button`
 

@@ -3,6 +3,8 @@ import { produce } from "immer";
 import { deleteCookie, setCookie } from "../../shared/cookie";
 import { actionCreators as postActions } from "./post";
 
+import { getCookie } from "../../shared/cookie";
+
 import axios from "axios";
 
 
@@ -16,6 +18,7 @@ const logOut = createAction(LOG_OUT, (user) => ({ user }));
 const setUser = createAction(SET_USER, (user) => ({ user }));
 const p_loading = createAction(P_LOADING, (p_loading) => ({ p_loading }));
 
+const token = sessionStorage.getItem('token');
 
 const initialState = {
     user_info: {
@@ -27,18 +30,13 @@ const initialState = {
     p_loading: false,
 };
 
-const user_initial = {
-    nickname: '',
-    userId: '',
-    user_profile: '',
-}
 
 
 // middleware actions
-const loginAction = (nickname, pwd, imageUrl = "") => {
+const loginBK = (nickname, pwd, imageUrl = "") => {
     return function (dispatch, getState, { history }) {
 
-        // dispatch(p_loading(true));
+        dispatch(p_loading(true));
 
         axios({
             method: 'post',
@@ -55,39 +53,24 @@ const loginAction = (nickname, pwd, imageUrl = "") => {
                 userProfile: imageUrl,
             }
 
-            const token = response.data.data.token;
-            console.log(token);
-
             sessionStorage.setItem('token', response.data.data.token);
 
             dispatch(setUser(user_info));
-            console.log(user_info);
+            dispatch(postActions.getPostBK());
+            history.push('/');
+            dispatch(p_loading(false));
 
-            axios({
-                method: 'get',
-                url: 'http://junehan-test.shop/api/posts',
-                headers: {
-                    authorization: `Bearer ${token}`,
-                }
-
-            }).then((response) => {
-                dispatch(postActions.setPost(response.data.data));
-
-                history.push('/');
-
-            }).catch((err) => {
-                console.log(err.message);
-            })
         }).catch((err) => {
             window.alert("아이디 혹은 비밀번호가 틀렸습니다.")
             console.log(err.message);
+            dispatch(p_loading(false));
         })
     }
 }
 
 
 
-const signupAction = (nickname, pwd, pwd2) => {
+const signupBK = (nickname, pwd, pwd2) => {
     return function (dispatch, getState, { history }) {
 
         axios({
@@ -102,7 +85,7 @@ const signupAction = (nickname, pwd, pwd2) => {
         }).then((response) => {
 
             console.log("회원가입 성공");
-            dispatch(loginAction(nickname, pwd))
+            dispatch(loginBK(nickname, pwd))
             history.push('/');
 
         }).catch((err) => {
@@ -118,8 +101,6 @@ const signupAction = (nickname, pwd, pwd2) => {
 const loginCheck = () => {
     return function (dispatch, getState, { history }) {
 
-        const token = sessionStorage.getItem('token');
-
         axios({
             method: 'get',
             url: 'http://junehan-test.shop/api/users/auth',
@@ -127,6 +108,7 @@ const loginCheck = () => {
                 authorization: `Bearer ${token}`,
             }
         }).then(function (response) {
+            console.log('로그인체크 성공');
             const user_info = {
                 nickname: response.data.data.nickname,
                 isAdmin: response.data.data.isAdmin,
@@ -134,6 +116,7 @@ const loginCheck = () => {
             }
             dispatch(setUser(user_info))
         }).catch((err) => {
+            console.log("로그인체크 실패");
             console.log(err.message);
         })
     }
@@ -179,8 +162,8 @@ export default handleActions({
 const actionCreators = {
     logOut,
     logOutBK,
-    loginAction,
-    signupAction,
+    loginBK,
+    signupBK,
     loginCheck,
     setUser,
 };

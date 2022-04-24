@@ -10,6 +10,7 @@ const Image = (props) => {
     const styles = {
         src: src,
         size: size,
+
     }
 
     if (shape === "circle") {
@@ -46,6 +47,7 @@ Image.defaultProps = {
 const AspectOutter = styled.div`
     width:100%;
     min-width: 250px;
+    cursor: pointer;
     
 `;
 

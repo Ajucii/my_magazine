@@ -10,6 +10,7 @@ import axios from "axios";
 
 import { actionCreators as imageActions } from "./image";
 import { history } from "../configStore";
+import { isLogin } from "../../shared/isLogin";
 
 
 const SET_POST = "SET_POST";
@@ -17,18 +18,25 @@ const ADD_POST = "ADD_POST";
 const EDIT_POST = "EDIT_POST";
 const DELETE_POST = "DELETE_POST";
 const LIKE_POST = "LIKE_POST";
+const LOADING = "LOADING";
+const P_LOADING = "P_LOADING"
 
 const setPost = createAction(SET_POST, (post_list) => ({ post_list }));
 const addPost = createAction(ADD_POST, (post, layout) => ({ post, layout }));
 const editPost = createAction(EDIT_POST, (post_id, post) => ({ post_id, post }));
 const deletePost = createAction(DELETE_POST, (post_id) => ({ post_id }));
 const likePost = createAction(LIKE_POST, (post_id, post) => ({ post_id, post }));
+const loading = createAction(LOADING, (is_loading) => ({ is_loading }));
+const p_loading = createAction(P_LOADING, (p_loading) => ({ p_loading }));
 
 const token = sessionStorage.getItem('token');
 
 const initialState = {
     list: [],
-    paging: { start: null, next: null, size: 3 },
+    // start: 시작점 정보, next: 다음 목록이 있나없나(다음 가져올 것의 정보, size: 몇개 가지고 올거냐
+    paging: { start: null, next: null, size: 2 },
+
+    //지금 가지고 오고 있는 중이니
     is_loading: false,
     p_loading: false,
 }
@@ -44,20 +52,48 @@ const initialPost = {
 }
 
 
-const getPostBK = () => {
+const getPostBK = (start = null, size = 3) => {
     return function (dispatch, getState, { history }) {
 
-        axios({
-            method: 'get',
-            url: 'http://junehan-test.shop/api/posts',
-            headers: {
-                authorization: `Bearer ${token}`,
-            }
-        }).then((response) => {
-            dispatch(setPost(response.data.data))
-        }).catch((err) => {
-            console.log(err.message);
-        })
+        const token = isLogin();
+        let _paging = getState().post.paging;
+
+        // if (_paging.start && !_paging.next) {
+        //     return;
+        // }
+
+        dispatch(loading(true));
+
+        // if(start){
+        // 쿼리가 지금 url이네!
+        // }
+
+        if (token) {
+            axios({
+                method: 'get',
+                url: `http://junehan-test.shop/api/posts`,
+                headers: {
+                    authorization: `Bearer ${token}`,
+                }
+            }).then((response) => {
+                dispatch(setPost(response.data.data))
+            }).catch((err) => {
+                console.log(err.message);
+            })
+        } else {
+            axios({
+                method: 'get',
+                url: `http://junehan-test.shop/api/posts`,
+                data: {}
+
+            }).then((response) => {
+                dispatch(setPost(response.data.data))
+            }).catch((err) => {
+                console.log(err.message);
+            })
+        }
+
+
     }
 }
 
@@ -86,8 +122,10 @@ const getOnePostBK = (post_id) => {
 const addPostBK = (contents = "", layout = "top") => {
     return function (dispatch, getState, { history }) {
 
+        const token = isLogin();
+        dispatch(p_loading(true));
+
         const _user = getState().user.user_info;
-        console.log(_user);
         const userInfo = {
             nickname: _user.nickname,
             userProfile: _user.userProfile,
@@ -120,6 +158,7 @@ const addPostBK = (contents = "", layout = "top") => {
                         data: { ...userInfo, ..._post, imageUrl: url, title: "타이틀1" }
 
                     }).then((response) => {
+                        console.log('업로드 성공');
                         let post = { ...userInfo, ..._post, postId: response.data.data.id, title: "", imageUrl: url };
                         dispatch(addPost(post));
                         dispatch(imageActions.setPreview(null));
@@ -137,6 +176,7 @@ const addPostBK = (contents = "", layout = "top") => {
 
 const editPostBK = (post_id = null, post = {}) => {
     return function (dispatch, getState, { history }) {
+
         if (!post_id) {
             console.log("게시물 정보가 없습니다");
         }
@@ -207,10 +247,16 @@ const editPostBK = (post_id = null, post = {}) => {
 const deletePostBK = (post_id = null) => {
     return function (dispatch, getState, { history }) {
 
+        const token = isLogin();
+
+        dispatch(p_loading(true));
         if (!post_id) {
-            console.log("게시물 정보가 없습니다");
+            window.alert("게시물 정보가 없습니다")
+            dispatch(p_loading(false));
             return;
         }
+
+
 
         axios({
             method: 'delete',
@@ -232,9 +278,7 @@ const deletePostBK = (post_id = null) => {
 const likePostBK = (post_id = null) => {
     return function (dispatch, getState, { history }) {
 
-        // 포스트 id불러와서 그 포스트의 isLike를 true로 해주고 count도 올려주고
-        // 그 포스트의 isLike가 true였으면 false로해주고 count -1 해주고
-
+        const token = isLogin()
         const post = getState().post.list.find(p => p.postId === parseInt(post_id));
 
         if (post.isLike === true) {
@@ -286,6 +330,7 @@ export default handleActions(
 
         [ADD_POST]: (state, action) => produce(state, (draft) => {
             draft.list.unshift(action.payload.post);
+            draft.p_loading = false;
         }),
 
         [EDIT_POST]: (state, action) => produce(state, (draft) => {
@@ -296,11 +341,18 @@ export default handleActions(
         [DELETE_POST]: (state, action) => produce(state, (draft) => {
             let index = draft.list.findIndex((p) => p.postId === parseInt(action.payload.post_id));
             draft.list.splice(index, 1);
+            draft.p_loading = false;
         }),
 
         [LIKE_POST]: (state, action) => produce(state, (draft) => {
             let index = draft.list.findIndex((p) => p.postId === parseInt(action.payload.post_id));
             draft.list[index] = { ...draft.list[index], ...action.payload.post };
+        }),
+        [LOADING]: (state, action) => produce(state, (draft) => {
+            draft.is_loading = action.payload.is_loading;
+        }),
+        [P_LOADING]: (state, action) => produce(state, (draft) => {
+            draft.p_loading = action.payload.p_loading;
         })
     },
     initialState

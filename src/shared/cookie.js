@@ -4,12 +4,12 @@
 const getCookie = (name) => {
     let value = "; " + document.cookie;
     let parts = value.split(`; ${name}=`);
+    console.log(value);
 
     if (parts.length === 2) {
         // parts 라는 원본 배열에 맨뒤에 있는게 사라짐.
         return parts.pop().split(";").shift();
     }
-
 }
 
 

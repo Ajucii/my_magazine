@@ -14,32 +14,7 @@ const Post = (props) => {
 
     const post_id = props.postId;
     const is_login = useSelector(state => state.user.is_login);
-    const user_info = useSelector(state => state.user.user_info)
-
-    const post_list = useSelector(state => state.post.list);
-
-
-    // const post_index = post_list.findIndex(p => p.postId === parseInt(post_id));
-    // const isLike = useSelector(state => state.post.list ? state.post.list[post_index].isLike : false);
-    // console.log(isLike);
-
-    // const [is_like, setIs_like] = useState(isLike ? true : false);
-
-
-
-    // useEffect(() => {
-    //     console.log(post_list);
-    //     setIs_like(isLike ? true : false)
-
-    // }, [is_like])
-
-
     const dispatch = useDispatch();
-
-
-
-
-    // const like = useSelector((state) => state.post ? state.post.list[post_id].isLike : false)
 
 
     const likeToggle = () => {
@@ -111,11 +86,13 @@ const Post = (props) => {
             )}
             {props.layout === "left" && (
                 <Grid
+
                     is_flex
                     _onClick={(e) => {
                         history.push(`/post/${props.postId}`)
-                    }}>
-                    <Image shape="rectangle" src={props.imageUrl} />
+                    }}
+                >
+                    <Image cursor="pointer" shape="rectangle" src={props.imageUrl} />
                     <Grid padding="16px 0px 5px 16px">
                         <Text>{props.content}</Text>
                     </Grid>
@@ -127,7 +104,7 @@ const Post = (props) => {
                     _onClick={(e) => {
                         history.push(`/post/${props.postId}`)
                     }}>
-                    <Image shape="rectangle" src={props.imageUrl} />
+                    <Image cursor="pointer" shape="rectangle" src={props.imageUrl} />
                     <Grid padding="16px 0px 5px 16px">
                         <Text>{props.content}</Text>
                     </Grid>

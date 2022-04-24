@@ -21,7 +21,7 @@ const Signup = () => {
             return;
         }
 
-        dispatch(userActions.signupAction(nickname, password, passwordCheck));
+        dispatch(userActions.signupBK(nickname, password, passwordCheck));
     }
 
     if (is_session) {

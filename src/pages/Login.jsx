@@ -2,7 +2,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { Button, Grid, Input, Text } from "../elements";
 import { actionCreators as userActions } from "../redux/modules/user";
 import styled from "styled-components";
-import { getCookie } from "../shared/cookie";
 import { useForm } from "react-hook-form";
 
 const Login = (props) => {
@@ -14,7 +13,7 @@ const Login = (props) => {
     const onSubmit = ({ nickname, password }) => {
 
         console.log(nickname, password);
-        dispatch(userActions.loginAction(nickname, password));
+        dispatch(userActions.loginBK(nickname, password));
 
     }
 
