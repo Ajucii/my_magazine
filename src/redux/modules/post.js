@@ -55,7 +55,6 @@ const getPostBK = (start = 1, size = 2) => {
         let _paging = getState().post.paging;
 
         if (_paging.next === false) {
-            console.log("다음꺼없어");
             return;
         }
 
@@ -95,7 +94,7 @@ const getPostBK = (start = 1, size = 2) => {
                 let post_list = response.data.data;
 
                 let paging = {
-                    start: start++,
+                    start: ++start,
                     next: post_list.length < 3 ? false : true,
                     size: size,
                 }
@@ -167,9 +166,10 @@ const addPostBK = (contents = "", layout = "top") => {
                         headers: {
                             authorization: `Bearer ${token}`,
                         },
-                        data: { ...userInfo, ..._post, imageUrl: url, title: "타이틀1" }
+                        data: { ...userInfo, ..._post, imageUrl: url, title: "빈 타이틀" }
 
                     }).then((response) => {
+                        console.log(response.data.data);
                         console.log('업로드 성공');
                         let post = { ...userInfo, ..._post, postId: response.data.data.id, title: "", imageUrl: url };
                         dispatch(addPost(post));

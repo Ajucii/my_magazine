@@ -7,8 +7,9 @@ import like_icon from "../../like_icon.png";
 import unlike_icon from "../../unlike_icon.png";
 import { actionCreators as postActions } from "../../redux/modules/post"
 
-const Post = (props) => {
 
+
+const Post = (props) => {
 
 
     const post_id = props.postId;

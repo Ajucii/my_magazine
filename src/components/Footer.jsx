@@ -8,9 +8,6 @@ const Footer = (props) => {
     const is_login = useSelector((state) => state.user.is_login);
 
 
-    // const is_login = useSelector((state) => state.user.is_login)
-    // const dispatch = useDispatch();
-
 
     return (
 
@@ -23,7 +20,6 @@ const Footer = (props) => {
                         window.alert("로그인이 필요합니다.")
                         history.push('/login')
                     }
-
                 }} is_footer text="+"></Button>
             </Grid>
         </Wrapper>

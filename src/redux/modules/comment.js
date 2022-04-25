@@ -95,10 +95,6 @@ const editCommentBK = (post_id = null, comment = {}) => {
         const comment_list = getState().comment.list
         console.log(comment_list);
         console.log(post_id);
-        // const _comment_index = getState().comment.list.findIndex((l) => l.commentId === parseInt(comment_id));
-        // const _comment = getState().comment.list[_comment_index];
-
-        // console.log(_comment);
 
         axios({
             method: 'put',
@@ -139,7 +135,7 @@ const deleteCommentBK = (post_id = null, comment_id = null) => {
             console.log("삭제 완료");
             dispatch(deleteComment(post_id, comment_id));
 
-            //이거 왜 하는지모르겠음 
+            // if(post) ?? 
             if (post) {
                 dispatch(postActions.editPost(post_id, {
                     commentCnt: parseInt(post.commentCnt) - 1,
@@ -169,7 +165,6 @@ export default handleActions(
             draft.list[action.payload.post_id].splice(index, 1);
         }),
         [EDIT_COMMENT]: (state, action) => produce(state, (draft) => {
-
 
             // 댓글 수정 시 리렌더링이 안되는 문제..
             let index = draft.list[action.payload.post_id].findIndex((p) => p.commentId === parseInt(action.payload.comment.comment_id));

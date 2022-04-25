@@ -12,10 +12,9 @@ import PostWrite from "../pages/PostWrite";
 import PostDetail from "../pages/PostDetail";
 import { Grid } from "../elements/index";
 import { useDispatch, useSelector } from "react-redux";
-import { actionCreators as postActions } from "../redux/modules/post";
 import { actionCreators as userActions } from "../redux/modules/user";
 import { useEffect } from "react";
-import Spinner from "../elements/Spinner";
+import PageSpinner from "../elements/PageSpinner";
 
 
 function App() {
@@ -35,7 +34,7 @@ function App() {
 
   return (
     <>
-      {!p_loading || <Spinner />}
+      {!p_loading || <PageSpinner />}
 
       <Wrapper>
         <Grid width="100%" maxWidth="500px" margin="auto" bg="white" minHeight="100vh">

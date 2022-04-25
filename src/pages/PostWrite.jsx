@@ -67,7 +67,7 @@ const PostWrite = (props) => {
                     로그인이 필요한 기능입니다.
                 </Text>
                 <Text size="16px">
-                    로그인 해줘.
+                    로그인 부탁드립니다.
                 </Text>
                 <Button
                     _onClick={() => {

@@ -12,9 +12,7 @@ const Login = (props) => {
 
     const onSubmit = ({ nickname, password }) => {
 
-        console.log(nickname, password);
         dispatch(userActions.loginBK(nickname, password));
-
     }
 
 

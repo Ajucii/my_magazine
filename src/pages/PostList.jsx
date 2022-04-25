@@ -15,7 +15,6 @@ const PostList = (props) => {
     const is_loading = useSelector((state) => state.post.is_loading);
     const paging = useSelector((state) => state.post.paging);
 
-
     useEffect(() => {
 
         // 게시글을 추가하면 이미 리덕스에 리스트가 있으니까 getPost를 하지 않음. 그럼 이미 있던 리덕스에
