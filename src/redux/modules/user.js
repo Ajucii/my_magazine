@@ -56,7 +56,6 @@ const loginBK = (nickname, pwd, imageUrl = "") => {
             sessionStorage.setItem('token', response.data.data.token);
 
             dispatch(setUser(user_info));
-            dispatch(postActions.getPostBK());
             history.push('/');
             dispatch(p_loading(false));
 

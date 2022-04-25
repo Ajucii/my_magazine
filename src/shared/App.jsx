@@ -25,7 +25,7 @@ function App() {
   const p_loading = useSelector(state => state.post.p_loading);
 
   useEffect(() => {
-    dispatch(postActions.getPostBK());
+
 
     if (is_session) {
       dispatch(userActions.loginCheck());
