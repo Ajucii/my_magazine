@@ -13,38 +13,43 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 
 const PostWrite = (props) => {
 
-    const is_session = sessionStorage.getItem('token') ? true : false;
-    const preview = useSelector((state) => state.image.preview);
     const dispatch = useDispatch();
 
+    const is_session = sessionStorage.getItem('token') ? true : false;
+    const preview = useSelector((state) => state.image.preview);
+
+
+
     const post_list = useSelector((state) => state.post.list);
-
     const post_id = props.match.params.id;
-    const is_edit = post_id ? true : false;
 
+    // is_edit이 true면 수정모드, false면 작성모드
+    const is_edit = post_id ? true : false;
     let _post = is_edit ? post_list.find((p) => p.postId === parseInt(post_id)) : null;
 
+    // 작성 시 contents와 layout의 초기값과 수정 시 리덕스에 저장된 해당 post_id와 일치하는 포스트의 contents, layout 보여주기
     const [contents, setContents] = useState(_post ? _post.content : "");
     const [layout, setLayout] = useState(_post ? _post.layout : "top");
 
 
-    // 리덕스에 데이터가 없으면(새로고침하면) 뒤로 가게..
+
     useEffect(() => {
+        // 수정 페이지에서 새로고침하면(리덕스 데이터가 사라지면) 뒤로 이동
         if (is_edit && !_post) {
-            console.log('포스트 정보가 없어요!');
             history.goBack();
             return;
         }
-        // is_edit이 true(수정모드)면 _post의 이미지 받아오기
+
+        // is_edit이 true(포스트 수정 시)면 _post의 이미지 받아오기
         if (is_edit) {
             dispatch(imageActions.setPreview(_post.imageUrl));
         }
     }, []);
 
+
     const changeContents = (e) => {
         setContents(e.target.value);
     }
-
 
     const addPost = () => {
         if (preview === null) {
@@ -59,7 +64,7 @@ const PostWrite = (props) => {
     }
 
 
-    // 로그인 상태가 아니면 PostWrite페이지 들어왔을 때 막히게끔
+    // 로그인 상태가 아니면 PostWrite페이지 들어왔을 때 로그인 페이지로 이동
     if (!is_session) {
         return (
             <Grid margin="100px 0px" padding="16px" >
@@ -136,9 +141,7 @@ const PostWrite = (props) => {
                 </>
             )}
 
-
             {layout === "left" && (
-
                 <Grid is_left>
                     <Grid padding="16px">
                         <Input value={contents} _onChange={changeContents} label="게시글 작성" placeholder="게시글 작성" multiLine />
@@ -147,8 +150,6 @@ const PostWrite = (props) => {
                         <Image shape="rectangle" src={preview ? preview : "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/No-Image-Placeholder.svg/1665px-No-Image-Placeholder.svg.png"} />
                     </Grid>
                 </Grid>
-
-
             )}
 
             {layout === "right" && (
@@ -162,10 +163,8 @@ const PostWrite = (props) => {
                             <Image shape="preview" src={preview ? preview : "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/No-Image-Placeholder.svg/1665px-No-Image-Placeholder.png"} />
                         </Grid>
                     </Grid>
-
                 </>
             )}
-
 
             <Grid padding="16px">
                 {is_edit ? (
@@ -175,7 +174,6 @@ const PostWrite = (props) => {
                 )}
             </Grid>
         </>
-
     )
 }
 

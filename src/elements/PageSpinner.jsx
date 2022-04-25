@@ -2,8 +2,8 @@
 import styled from "styled-components"
 import CircularProgress from '@mui/material/CircularProgress';
 
-// 로딩 화면 컴포넌트
-const Spinner = () => {
+// 페이지가 로딩상태(P_LOADING)일 때 페이지 로딩 스피너 컴포넌트
+const PageSpinner = () => {
 
     return (
         <Outter>
@@ -24,9 +24,7 @@ const Outter = styled.div`
     align-items: center;
     justify-content: center;
     transition:all 1s;
-
 `;
 
 
-
-export default Spinner;
+export default PageSpinner;

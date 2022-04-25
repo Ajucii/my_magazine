@@ -8,10 +8,11 @@ const Login = (props) => {
 
     const dispatch = useDispatch();
 
+    // react-hook-form을 통한 유효성 검사
     const { register, formState: { errors, isValid, isDirty }, handleSubmit } = useForm({ mode: "onChange" });
 
+    // 닉네임 === 아이디
     const onSubmit = ({ nickname, password }) => {
-
         dispatch(userActions.loginBK(nickname, password));
     }
 
@@ -20,7 +21,6 @@ const Login = (props) => {
         <form onSubmit={handleSubmit(onSubmit)}>
             <Grid padding="16px">
                 <Text size="32px" bold="bold">로그인</Text>
-
                 <Grid padding="16px 0px">
                     <InputBox>
                         <p>아이디</p><br></br>
@@ -34,7 +34,6 @@ const Login = (props) => {
                                 }
                             )}></input>
                     </InputBox>
-
                     <InputBox>
                         <p>비밀번호</p><br></br>
                         {errors && <span>{errors?.password?.message}</span>}
@@ -51,7 +50,6 @@ const Login = (props) => {
                     disabled={!isDirty || !isValid}
                     text="로그인하기"
                 ></Button>
-
             </Grid>
         </form>
     )
@@ -69,22 +67,17 @@ const InputBox = styled.div`
     margin: 0px;
     padding-bottom : 0px;
   }
-
   & span{
     color:tomato;
     font-size: 12px;
     margin-top: 0px;
   }
-
   & input {
-
-
     border:1px solid #212121;
     width : 100%;
     padding : 12px 4px;
     box-sizing : border-box;
   }
-
   & input:focus {
     outline: none !important;
     border: 2px tomato solid ;

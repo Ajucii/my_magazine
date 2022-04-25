@@ -7,8 +7,6 @@ const Footer = (props) => {
 
     const is_login = useSelector((state) => state.user.is_login);
 
-
-
     return (
 
         <Wrapper>

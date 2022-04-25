@@ -1,5 +1,5 @@
-import { Grid, Text, Input, Button } from "../elements";
-import { useDispatch, useSelector } from "react-redux";
+import { Grid, Text, Button } from "../elements";
+import { useDispatch } from "react-redux";
 import { actionCreators as userActions } from "../redux/modules/user";
 import styled from "styled-components";
 import { useForm } from "react-hook-form";
@@ -9,26 +9,24 @@ import { history } from "../redux/configStore";
 const Signup = () => {
 
     const dispatch = useDispatch();
-
-    const is_login = useSelector((state) => state.user.is_login);
     const is_session = sessionStorage.getItem('token') ? true : false;
-
+    // react hook form을 통한 유효성 검사
     const { register, formState: { errors }, handleSubmit } = useForm({ mode: "onChange" });
 
-    const onSubmit = ({ nickname, password, passwordCheck }) => {
-        if (password !== passwordCheck) {
-            window.alert("비밀번호가 일치하지 않습니다.")
-            return;
-        }
-
-        dispatch(userActions.signupBK(nickname, password, passwordCheck));
-    }
 
     if (is_session) {
         window.alert("이미 로그인이 되어있습니다")
         history.replace("/");
     }
 
+
+    const onSubmit = ({ nickname, password, passwordCheck }) => {
+        if (password !== passwordCheck) {
+            window.alert("비밀번호가 일치하지 않습니다.")
+            return;
+        }
+        dispatch(userActions.signupBK(nickname, password, passwordCheck));
+    }
 
 
     return (

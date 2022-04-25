@@ -12,32 +12,23 @@ import CommentEdit from "./CommentEdit";
 
 const CommentList = (props) => {
 
-    const { post_id } = props;
-
     const dispatch = useDispatch();
     const comment_list = useSelector((state) => state.comment.list);
     const user_info = useSelector((state) => state.user.user_info);
 
-
-
-
-    console.log(comment_list);
-
     useEffect(() => {
-        dispatch(commentActions.getCommentBK(post_id));
-
+        dispatch(commentActions.getCommentBK(props.post_id));
     }, []);
 
-    // comment_list가 없고 post_id가 안 넘어왔을 때
-    if (!comment_list[post_id] || !post_id) {
+    // comment_list가 없고 post_id가 안 넘어왔을 때 return null
+    if (!comment_list[props.post_id] || !props.post_id) {
         return null;
     }
 
     return (
-
         <Grid padding="0px 16px 0px 0px">
-            {comment_list[post_id].map((c, index) => {
-
+            {comment_list[props.post_id].map((c, index) => {
+                // 코멘트를 작성한 유저와 접속한 유저의 닉네임(아이디)가 같을 경우 댓글 수정, 삭제를 위한 is_me prop 전달
                 if (c.nickname === user_info?.nickname) {
                     return (
                         <Grid key={c.commentId}>
@@ -57,7 +48,6 @@ const CommentList = (props) => {
 }
 
 
-// props로 받아온거가 있으니까 디폴트props설정
 CommentList.defaultProps = {
     post_id: null,
 }
@@ -66,12 +56,9 @@ export default CommentList;
 
 
 
-
 const CommentItem = (props) => {
 
-    // const { imageUrl, nickname, commentId, userId, postId, content, created } = props;
     const dispatch = useDispatch();
-
     const [is_edit, setIs_edit] = useState(false);
 
     const editComment = () => {

@@ -1,9 +1,7 @@
 import { createAction, handleActions } from "redux-actions";
-import { produce } from "immer";
-import { deleteCookie, setCookie } from "../../shared/cookie";
 import { actionCreators as postActions } from "./post";
+import { produce } from "immer";
 
-import { getCookie } from "../../shared/cookie";
 
 import axios from "axios";
 
@@ -32,11 +30,13 @@ const initialState = {
 
 
 
-// middleware actions
+// 로그인 미들웨어
 const loginBK = (nickname, pwd, imageUrl = "") => {
     return function (dispatch, getState, { history }) {
 
+        // 페이지 로딩 시작
         dispatch(p_loading(true));
+        let _paging = getState().post.paging;
 
         axios({
             method: 'post',
@@ -52,23 +52,25 @@ const loginBK = (nickname, pwd, imageUrl = "") => {
                 isAdmin: response.data.data.isAdmin,
                 userProfile: imageUrl,
             }
-
+            // 로그인 시 받아온 유저정보와 토큰 설정
             sessionStorage.setItem('token', response.data.data.token);
-
             dispatch(setUser(user_info));
+            dispatch(postActions.getPostBK(_paging.start));
             history.push('/');
+
+            // 페이지 로딩 끝
             dispatch(p_loading(false));
 
         }).catch((err) => {
+            dispatch(p_loading(false));
             window.alert("아이디 혹은 비밀번호가 틀렸습니다.")
             console.log(err.message);
-            dispatch(p_loading(false));
         })
     }
 }
 
 
-
+// 회원가입 미들웨어
 const signupBK = (nickname, pwd, pwd2) => {
     return function (dispatch, getState, { history }) {
 
@@ -82,8 +84,7 @@ const signupBK = (nickname, pwd, pwd2) => {
             }
 
         }).then((response) => {
-
-            console.log("회원가입 성공");
+            // 회원가입에 성공하면 바로 로그인한 상태로 메인페이지 이동
             dispatch(loginBK(nickname, pwd))
             history.push('/');
 
@@ -95,8 +96,7 @@ const signupBK = (nickname, pwd, pwd2) => {
 }
 
 
-
-
+// 로그인 체크 미들웨어(새로고침 시에도 로그인 유지되게)
 const loginCheck = () => {
     return function (dispatch, getState, { history }) {
 
@@ -107,7 +107,6 @@ const loginCheck = () => {
                 authorization: `Bearer ${token}`,
             }
         }).then(function (response) {
-            console.log('로그인체크 성공');
             const user_info = {
                 nickname: response.data.data.nickname,
                 isAdmin: response.data.data.isAdmin,
@@ -115,38 +114,32 @@ const loginCheck = () => {
             }
             dispatch(setUser(user_info))
         }).catch((err) => {
-            console.log("로그인체크 실패");
             console.log(err.message);
         })
     }
 }
 
 
-
+// 로그아웃 미들웨어
 const logOutBK = () => {
     return function (dispatch, getState, { history }) {
         sessionStorage.removeItem('token');
         dispatch(logOut());
-        history.replace('/');
     }
 }
 
 
-// reducer
+
+// 유저 리듀서
 export default handleActions({
     [SET_USER]: (state, action) => produce(state, (draft) => {
-        // setCookie("is_login", "success");
-        // createAction을 사용할 경우 받아온 action에 payload를 중간에 거쳐야 인자로 넘겨준 값을 받아올 수 있다.
         draft.user_info = action.payload.user;
         draft.is_login = true;
-        // draft.p_loading = false;
     }),
 
     [LOG_OUT]: (state, action) => produce(state, (draft) => {
-        // deleteCookie("is_login");
         draft.user_info = null;
         draft.is_login = false;
-
     }),
 
     [P_LOADING]: (state, action) => produce(state, (draft) => {

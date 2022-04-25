@@ -8,9 +8,7 @@ import unlike_icon from "../../unlike_icon.png";
 import { actionCreators as postActions } from "../../redux/modules/post"
 
 
-
 const Post = (props) => {
-
 
     const post_id = props.postId;
     const is_login = useSelector(state => state.user.is_login);
@@ -18,7 +16,6 @@ const Post = (props) => {
 
 
     const likeToggle = () => {
-
         if (!is_login) {
             window.alert("로그인이 필요한 서비스입니다.")
             history.replace('/login');
@@ -29,7 +26,6 @@ const Post = (props) => {
 
 
     return (
-
         <Grid>
             <Grid is_flex >
                 <CardHeader
@@ -43,14 +39,12 @@ const Post = (props) => {
 
                 <Grid width="auto" margin="0px 15px">
                     {props.is_me && <Button
-
                         text="수정" margin="2px" width="60px" _onClick={() => {
                             history.push(`/write/${props.postId}`);
                         }}>
                     </Button>
                     }
                     {props.is_me && <Button
-
                         text="삭제" margin="2px" width="60px" _onClick={() => {
                             if (window.confirm("삭제하시겠습니까?")) {
                                 dispatch(postActions.deletePostBK(props.postId));
@@ -60,7 +54,6 @@ const Post = (props) => {
                     }
                 </Grid>
             </Grid>
-
 
             {props.layout === "top" && (
                 <Grid
@@ -73,6 +66,7 @@ const Post = (props) => {
                     </Grid>
                 </Grid>
             )}
+
             {props.layout === "bottom" && (
                 <Grid
                     _onClick={(e) => {
@@ -84,6 +78,7 @@ const Post = (props) => {
                     <Image shape="rectangle" src={props.imageUrl} />
                 </Grid>
             )}
+
             {props.layout === "left" && (
                 <Grid
 
@@ -98,6 +93,7 @@ const Post = (props) => {
                     </Grid>
                 </Grid>
             )}
+
             {props.layout === "right" && (
                 <Grid
                     is_left
@@ -130,9 +126,6 @@ const Post = (props) => {
                 <Text margin="5px" bold>좋아요 {props.likeCnt}개</Text>
                 <Text margin="5px" bold>댓글 {props.commentCnt}개</Text>
             </Grid>
-
-
-
         </Grid>
     )
 }

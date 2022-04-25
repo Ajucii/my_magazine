@@ -23,9 +23,8 @@ function App() {
   const is_session = sessionStorage.getItem('token') ? true : false;
   const p_loading = useSelector(state => state.post.p_loading);
 
+  // 로그인 체크
   useEffect(() => {
-
-
     if (is_session) {
       dispatch(userActions.loginCheck());
     }
@@ -40,7 +39,6 @@ function App() {
         <Grid width="100%" maxWidth="500px" margin="auto" bg="white" minHeight="100vh">
           <Header></Header>
           <ConnectedRouter history={history}>
-
             <Route path="/" exact component={PostList} />
             <Route path="/login" exact component={Login} />
             <Route path="/signup" exact component={Signup} />

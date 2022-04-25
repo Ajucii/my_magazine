@@ -1,15 +1,11 @@
-// 액션과 리듀서를 편하게 만들어주는 역할
 import { createAction, handleActions } from "redux-actions";
 import { storage } from "../../shared/firebase";
-
-// 불변성 관리
 import { produce } from "immer";
 
 import moment from "moment";
 import axios from "axios";
 
 import { actionCreators as imageActions } from "./image";
-import { history } from "../configStore";
 import { isLogin } from "../../shared/isLogin";
 
 
@@ -17,23 +13,22 @@ const SET_POST = "SET_POST";
 const ADD_POST = "ADD_POST";
 const EDIT_POST = "EDIT_POST";
 const DELETE_POST = "DELETE_POST";
-const LIKE_POST = "LIKE_POST";
 const LOADING = "LOADING";
 const P_LOADING = "P_LOADING"
+
 
 const setPost = createAction(SET_POST, (post_list, paging) => ({ post_list, paging }));
 const addPost = createAction(ADD_POST, (post, layout) => ({ post, layout }));
 const editPost = createAction(EDIT_POST, (post_id, post) => ({ post_id, post }));
 const deletePost = createAction(DELETE_POST, (post_id) => ({ post_id }));
-const likePost = createAction(LIKE_POST, (post_id, post) => ({ post_id, post }));
 const loading = createAction(LOADING, (is_loading) => ({ is_loading }));
 const p_loading = createAction(P_LOADING, (p_loading) => ({ p_loading }));
 
-const token = sessionStorage.getItem('token');
 
 const initialState = {
     list: [],
-    paging: { start: 1, next: true, size: 2 },
+    // 1 page부터 시작해서 다음페이지가 있으면 next는 true 없으면 false
+    paging: { start: 1, next: true },
     is_loading: false,
     p_loading: false,
 }
@@ -49,37 +44,39 @@ const initialPost = {
 }
 
 
-const getPostBK = (start = 1, size = 2) => {
+// 포스트 가져오기 미들웨어
+const getPostBK = (start = 1) => {
     return function (dispatch, getState, { history }) {
 
         let _paging = getState().post.paging;
 
+        // 다음 페이지가 없으면 그만 부르자
         if (_paging.next === false) {
             return;
         }
 
-        const token = isLogin();
         dispatch(loading(true));
+
+        // 유저마다 포스트들에 저장된 isLike(좋아요한 포스트인지 아닌지) 가져오기 위해 토큰이 있으면
+        // 토큰과 함께 api 요청, 없으면 토큰 없이 api 요청
+        const token = isLogin();
 
         if (token) {
             axios({
                 method: 'get',
+                // 한 페이지당 포스트 갯수는 3개씩
                 url: `http://junehan-test.shop/api/posts?page=${start}`,
                 headers: {
                     authorization: `Bearer ${token}`,
                 }
             }).then((response) => {
-
                 let post_list = response.data.data;
-
                 let paging = {
                     start: ++start,
+                    // 페이지 내에 포스트 갯수가 3개보다 적으면 다음페이지가 없으므로..
                     next: post_list.length < 3 ? false : true,
-                    size: size,
                 }
-
                 dispatch(setPost(post_list, paging));
-
             }).catch((err) => {
                 console.log(err.message);
             })
@@ -88,19 +85,13 @@ const getPostBK = (start = 1, size = 2) => {
                 method: 'get',
                 url: `http://junehan-test.shop/api/posts?page=${start}`,
                 data: {}
-
             }).then((response) => {
-
                 let post_list = response.data.data;
-
                 let paging = {
                     start: ++start,
                     next: post_list.length < 3 ? false : true,
-                    size: size,
                 }
-
                 dispatch(setPost(post_list, paging));
-
             }).catch((err) => {
                 console.log(err.message);
             })
@@ -109,14 +100,15 @@ const getPostBK = (start = 1, size = 2) => {
 }
 
 
-
+// 포스트 한 개 가져오기 미들웨어
 const getOnePostBK = (post_id) => {
-    return function (dispatch, getState, { history }) {
 
+    const token = isLogin();
+
+    return function (dispatch, getState, { history }) {
         axios({
             method: 'get',
             url: `http://junehan-test.shop/api/posts/${post_id}`,
-
             headers: {
                 authorization: `Bearer ${token}`,
             }
@@ -129,7 +121,7 @@ const getOnePostBK = (post_id) => {
 }
 
 
-
+// 포스트 추가 미들웨어
 const addPostBK = (contents = "", layout = "top") => {
     return function (dispatch, getState, { history }) {
 
@@ -146,9 +138,7 @@ const addPostBK = (contents = "", layout = "top") => {
             layout: layout,
             content: contents,
         };
-
         const _image = getState().image.preview;
-
         const _upload = storage
             .ref(`images/${userInfo.nickname}_${new Date().getTime()}`)
             .putString(_image, "data_url");
@@ -167,27 +157,27 @@ const addPostBK = (contents = "", layout = "top") => {
                             authorization: `Bearer ${token}`,
                         },
                         data: { ...userInfo, ..._post, imageUrl: url, title: "빈 타이틀" }
-
                     }).then((response) => {
-                        console.log(response.data.data);
-                        console.log('업로드 성공');
-                        let post = { ...userInfo, ..._post, postId: response.data.data.id, title: "", imageUrl: url };
+                        let post = { ...userInfo, ..._post, postId: response.data.data.id, imageUrl: url };
                         dispatch(addPost(post));
                         dispatch(imageActions.setPreview(null));
                         history.replace("/");
                     })
                 })
                 .catch((error) => {
-                    alert("IMAGE UPLOAD FAILED");
-                    console.log("IMAGE UPLOAD FAILED!", error);
+                    alert("이미지 업로드에 실패했습니다.");
+                    console.log(error.message);
                 });
         });
     };
 };
 
 
+// 포스트 수정 미들웨어
 const editPostBK = (post_id = null, post = {}) => {
     return function (dispatch, getState, { history }) {
+
+        const token = isLogin();
 
         if (!post_id) {
             console.log("게시물 정보가 없습니다");
@@ -197,6 +187,7 @@ const editPostBK = (post_id = null, post = {}) => {
         const _post_index = getState().post.list.findIndex(p => p.postId === parseInt(post_id));
         const _post = getState().post.list[_post_index];
 
+        // 이미지를 교체하지 않았을 경우, 인자로 받아온 포스트의 컨텐츠와 레이아웃만 교체
         if (_image === _post.imageUrl) {
             axios({
                 method: 'post',
@@ -205,17 +196,18 @@ const editPostBK = (post_id = null, post = {}) => {
                     authorization: `Bearer ${token}`,
                 },
                 data: { ...post }
+
             }).then(response => {
-                console.log("수정완료");
                 dispatch(editPost(post_id, { ...post }));
                 history.replace("/");
+
             }).catch((err) => {
-                console.log("수정실패");
                 history.replace("/");
                 console.log(err.message);
             })
             return;
 
+            // 이미지를 교체한 경우
         } else {
             const user_nickname = getState().user.user_info.nickname;
 
@@ -225,7 +217,6 @@ const editPostBK = (post_id = null, post = {}) => {
 
             _upload.then(snapshot => {
                 snapshot.ref.getDownloadURL().then(url => {
-                    console.log(url);
                     return url;
 
                 }).then(url => {
@@ -236,12 +227,12 @@ const editPostBK = (post_id = null, post = {}) => {
                             authorization: `Bearer ${token}`,
                         },
                         data: { ...post, imageUrl: url }
+
                     }).then(response => {
-                        console.log("수정완료");
                         dispatch(editPost(post_id, { ...post, imageUrl: url }));
                         history.replace("/");
+
                     }).catch((err) => {
-                        console.log("수정실패");
                         history.replace("/");
                         console.log(err.message);
                     })
@@ -256,6 +247,7 @@ const editPostBK = (post_id = null, post = {}) => {
 }
 
 
+// 포스트 삭제 미들웨어
 const deletePostBK = (post_id = null) => {
     return function (dispatch, getState, { history }) {
 
@@ -268,8 +260,6 @@ const deletePostBK = (post_id = null) => {
             return;
         }
 
-
-
         axios({
             method: 'delete',
             url: `http://junehan-test.shop/api/posts/${post_id}`,
@@ -277,7 +267,6 @@ const deletePostBK = (post_id = null) => {
                 authorization: `Bearer ${token}`,
             },
         }).then(response => {
-            console.log("삭제완료");
             dispatch(deletePost(post_id));
             history.replace("/");
         }).catch((err) => {
@@ -287,14 +276,15 @@ const deletePostBK = (post_id = null) => {
 }
 
 
+// 포스트 좋아요 미들웨어
 const likePostBK = (post_id = null) => {
     return function (dispatch, getState, { history }) {
 
         const token = isLogin()
         const post = getState().post.list.find(p => p.postId === parseInt(post_id));
 
+        // 좋아요 상태라면 좋아요 취소
         if (post.isLike === true) {
-
             axios({
                 method: 'delete',
                 url: `http://junehan-test.shop/api/posts/${post_id}/like`,
@@ -302,15 +292,14 @@ const likePostBK = (post_id = null) => {
                     authorization: `Bearer ${token}`,
                 },
             }).then(response => {
-                console.log("좋아요 취소 완료");
-                dispatch(likePost(post_id, { ...post, isLike: false, likeCnt: parseInt(post.likeCnt) - 1 }))
+                // 좋아요 상태 및 갯수 리덕스 적용
+                dispatch(editPost(post_id, { ...post, isLike: false, likeCnt: parseInt(post.likeCnt) - 1 }))
 
             }).catch((err) => {
                 console.log(err.message);
             });
 
         } else {
-
             axios({
                 method: 'post',
                 url: `http://junehan-test.shop/api/posts/${post_id}/like`,
@@ -318,9 +307,7 @@ const likePostBK = (post_id = null) => {
                     authorization: `Bearer ${token}`,
                 },
             }).then(response => {
-
-                console.log("좋아요 완료");
-                dispatch(likePost(post_id, { ...post, isLike: true, likeCnt: parseInt(post.likeCnt + 1) }))
+                dispatch(editPost(post_id, { ...post, isLike: true, likeCnt: parseInt(post.likeCnt + 1) }))
 
             }).catch((err) => {
                 console.log(err.message);
@@ -332,21 +319,13 @@ const likePostBK = (post_id = null) => {
 
 
 
-
+// 포스트 리듀서
 export default handleActions(
     {
         [SET_POST]: (state, action) => produce(state, (draft) => {
-
             draft.list.push(...action.payload.post_list);
             draft.paging = action.payload.paging;
-
-
-            // draft.list = action.payload.post_list;
-
             draft.is_loading = false;
-
-
-
         }),
 
         [ADD_POST]: (state, action) => produce(state, (draft) => {
@@ -365,13 +344,10 @@ export default handleActions(
             draft.p_loading = false;
         }),
 
-        [LIKE_POST]: (state, action) => produce(state, (draft) => {
-            let index = draft.list.findIndex((p) => p.postId === parseInt(action.payload.post_id));
-            draft.list[index] = { ...draft.list[index], ...action.payload.post };
-        }),
         [LOADING]: (state, action) => produce(state, (draft) => {
             draft.is_loading = action.payload.is_loading;
         }),
+
         [P_LOADING]: (state, action) => produce(state, (draft) => {
             draft.p_loading = action.payload.p_loading;
         })
