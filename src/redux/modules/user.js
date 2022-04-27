@@ -55,7 +55,7 @@ const loginBK = (nickname, pwd, imageUrl = "") => {
             // 로그인 시 받아온 유저정보와 토큰 설정
             sessionStorage.setItem('token', response.data.data.token);
             dispatch(setUser(user_info));
-            dispatch(postActions.getPostBK(_paging.start));
+            // dispatch(postActions.getPostBK(_paging.start));
             history.push('/');
 
             // 페이지 로딩 끝
@@ -123,8 +123,13 @@ const loginCheck = () => {
 // 로그아웃 미들웨어
 const logOutBK = () => {
     return function (dispatch, getState, { history }) {
+
+
+        // let is_like = getState().post.paging;
+
         sessionStorage.removeItem('token');
         dispatch(logOut());
+        history.push('/');
     }
 }
 
@@ -134,6 +139,7 @@ const logOutBK = () => {
 export default handleActions({
     [SET_USER]: (state, action) => produce(state, (draft) => {
         draft.user_info = action.payload.user;
+        console.log(draft.user_info);
         draft.is_login = true;
     }),
 

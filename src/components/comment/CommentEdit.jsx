@@ -6,9 +6,9 @@ import { actionCreators as commentActions } from "../../redux/modules/comment";
 
 const CommentEdit = (props) => {
 
-    const comment_list = useSelector((state) => state.comment.list);
-    const post_id = props.postId;
 
+    const post_id = props.postId;
+    const comment_list = useSelector((state) => state.comment.list);
     const index = comment_list[post_id].findIndex((c) => c.commentId === parseInt(props.commentId));
     const comment = comment_list[post_id][index];
     const [content, setContent] = useState(comment.content);
@@ -27,7 +27,7 @@ const CommentEdit = (props) => {
         }
 
         dispatch(commentActions.editCommentBK(post_id, { ...comment, content: content }));
-        // 자식에서 부모 컴포넌트ㄹ에게 is_edit 상태 날리기
+        // 자식에서 부모 컴포넌트에게 is_edit 상태 날리기
         props.is_edit(false);
         setContent("");
     }

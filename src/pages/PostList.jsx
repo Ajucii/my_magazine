@@ -19,39 +19,37 @@ const PostList = (props) => {
 
     useEffect(() => {
         // 게시물이 하나도 없을때 추가할 경우 리덕스에 저장된 포스트 1개만 보여지는 것을 방지하기 위함
-        if (post_list.length < 2) {
-            dispatch(postActions.getPostBK(paging.start));
-        }
+        // if (post_list.length < 2) {
+        dispatch(postActions.getPostBK());
+        // }
     }, []);
 
     return (
         <>
             <Grid bg="#f4f4f4" padding="15px 0px 47px 0px">
-                <InfinityScroll
+                {/* <InfinityScroll
                     callNext={() => {
                         dispatch(postActions.getPostBK(paging.start));
                     }}
                     is_next={paging.next ? true : false}
                     loading={is_loading}
-                >
-                    {post_list.map((p, index) => {
-                        return (
-                            <Grid
-                                bg="#ffffff"
-                                margin="8px 0px"
-                                key={p.postId}>
-                                <Post {...p} is_me={p.nickname === user_info?.nickname} />
-                            </Grid>
-                        )
-                    })}
-                </InfinityScroll>
+                > */}
+                {post_list.map((p, index) => {
+                    return (
+                        <Grid
+                            bg="#ffffff"
+                            margin="8px 0px"
+                            key={p.postId}>
+                            <Post {...p} is_me={p.nickname === user_info?.nickname} />
+                        </Grid>
+                    )
+                })}
+                {/* </InfinityScroll> */}
             </Grid>
             <Footer />
         </>
     )
 }
-
-
 
 
 export default PostList;

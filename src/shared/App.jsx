@@ -10,6 +10,7 @@ import Login from "../pages/Login";
 import Signup from "../pages/Signup";
 import PostWrite from "../pages/PostWrite";
 import PostDetail from "../pages/PostDetail";
+import Notification from "../pages/Notification";
 import { Grid } from "../elements/index";
 import { useDispatch, useSelector } from "react-redux";
 import { actionCreators as userActions } from "../redux/modules/user";
@@ -20,11 +21,15 @@ import PageSpinner from "../elements/PageSpinner";
 function App() {
 
   const dispatch = useDispatch();
+  const is_login = useSelector(state => state.user.is_login);
   const is_session = sessionStorage.getItem('token') ? true : false;
   const p_loading = useSelector(state => state.post.p_loading);
 
   // 로그인 체크
   useEffect(() => {
+
+    console.log("로그인 체크");
+
     if (is_session) {
       dispatch(userActions.loginCheck());
     }
@@ -45,6 +50,7 @@ function App() {
             <Route path="/write" exact component={PostWrite} />
             <Route path="/write/:id" exact component={PostWrite} />
             <Route path="/post/:id" exact component={PostDetail} />
+            <Route path="/noti" exact component={Notification} />
           </ConnectedRouter>
         </Grid>
       </Wrapper>

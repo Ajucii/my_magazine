@@ -6,7 +6,7 @@ import moment from "moment";
 import axios from "axios";
 
 import { actionCreators as imageActions } from "./image";
-import { isLogin } from "../../shared/isLogin";
+import { getToken } from "../../shared/getToken";
 
 
 const SET_POST = "SET_POST";
@@ -45,8 +45,9 @@ const initialPost = {
 
 
 // 포스트 가져오기 미들웨어
-const getPostBK = (start = 1) => {
+const getPostBK = () => {
     return function (dispatch, getState, { history }) {
+
 
         let _paging = getState().post.paging;
 
@@ -59,43 +60,28 @@ const getPostBK = (start = 1) => {
 
         // 유저마다 포스트들에 저장된 isLike(좋아요한 포스트인지 아닌지) 가져오기 위해 토큰이 있으면
         // 토큰과 함께 api 요청, 없으면 토큰 없이 api 요청
-        const token = isLogin();
+        const token = sessionStorage.getItem('token')
 
-        if (token) {
-            axios({
-                method: 'get',
-                // 한 페이지당 포스트 갯수는 3개씩
-                url: `http://junehan-test.shop/api/posts?page=${start}`,
-                headers: {
-                    authorization: `Bearer ${token}`,
-                }
-            }).then((response) => {
-                let post_list = response.data.data;
-                let paging = {
-                    start: ++start,
-                    // 페이지 내에 포스트 갯수가 3개보다 적으면 다음페이지가 없으므로..
-                    next: post_list.length < 3 ? false : true,
-                }
-                dispatch(setPost(post_list, paging));
-            }).catch((err) => {
-                console.log(err.message);
-            })
-        } else {
-            axios({
-                method: 'get',
-                url: `http://junehan-test.shop/api/posts?page=${start}`,
-                data: {}
-            }).then((response) => {
-                let post_list = response.data.data;
-                let paging = {
-                    start: ++start,
-                    next: post_list.length < 3 ? false : true,
-                }
-                dispatch(setPost(post_list, paging));
-            }).catch((err) => {
-                console.log(err.message);
-            })
-        }
+        // 페이지가 몇개까지 나오는지..
+        axios({
+            method: 'get',
+            // 한 페이지당 포스트 갯수는 3개씩
+            url: `http://junehan-test.shop/api/posts/`,
+            headers: {
+                authorization: `Bearer ${token}`,
+            }
+        }).then((response) => {
+            let post_list = response.data.data;
+            // let paging = {
+            //     start: ++start,
+            // 페이지 내에 포스트 갯수가 3개보다 적으면 다음페이지가 없으므로..
+            // next: post_list.length < 3 ? false : true,
+            // }
+            dispatch(setPost(post_list));
+        }).catch((err) => {
+            console.log(err.message);
+        })
+
     }
 }
 
@@ -103,7 +89,7 @@ const getPostBK = (start = 1) => {
 // 포스트 한 개 가져오기 미들웨어
 const getOnePostBK = (post_id) => {
 
-    const token = isLogin();
+    const token = sessionStorage.getItem('token')
 
     return function (dispatch, getState, { history }) {
         axios({
@@ -125,7 +111,7 @@ const getOnePostBK = (post_id) => {
 const addPostBK = (contents = "", layout = "top") => {
     return function (dispatch, getState, { history }) {
 
-        const token = isLogin();
+        const token = sessionStorage.getItem('token')
         dispatch(p_loading(true));
 
         const _user = getState().user.user_info;
@@ -177,7 +163,7 @@ const addPostBK = (contents = "", layout = "top") => {
 const editPostBK = (post_id = null, post = {}) => {
     return function (dispatch, getState, { history }) {
 
-        const token = isLogin();
+        const token = sessionStorage.getItem('token')
 
         if (!post_id) {
             console.log("게시물 정보가 없습니다");
@@ -251,7 +237,7 @@ const editPostBK = (post_id = null, post = {}) => {
 const deletePostBK = (post_id = null) => {
     return function (dispatch, getState, { history }) {
 
-        const token = isLogin();
+        const token = sessionStorage.getItem('token')
 
         dispatch(p_loading(true));
         if (!post_id) {
@@ -280,9 +266,9 @@ const deletePostBK = (post_id = null) => {
 const likePostBK = (post_id = null) => {
     return function (dispatch, getState, { history }) {
 
-        const token = isLogin()
+        const token = sessionStorage.getItem('token')
         const post = getState().post.list.find(p => p.postId === parseInt(post_id));
-
+        console.log(token);
         // 좋아요 상태라면 좋아요 취소
         if (post.isLike === true) {
             axios({
@@ -322,9 +308,15 @@ const likePostBK = (post_id = null) => {
 // 포스트 리듀서
 export default handleActions(
     {
+        // 무한 스크롤, 받아오는거 따로
         [SET_POST]: (state, action) => produce(state, (draft) => {
-            draft.list.push(...action.payload.post_list);
-            draft.paging = action.payload.paging;
+            // draft.list.push(...action.payload.post_list);
+            draft.list = action.payload.post_list;
+
+            // if (action.payload.paging) {
+            //     draft.paging = action.payload.paging;
+            // }
+
             draft.is_loading = false;
         }),
 

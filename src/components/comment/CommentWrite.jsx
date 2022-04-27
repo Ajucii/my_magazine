@@ -10,20 +10,16 @@ const CommentWrite = (props) => {
     const [comment_text, setCommentText] = useState("");
     const dispatch = useDispatch();
 
-    const { post_id } = props;
-
     const onChange = (e) => {
         setCommentText(e.target.value);
     }
 
     const write = () => {
-
         if (comment_text === "") {
             window.alert("댓글을 입력해주세요")
             return null;
         }
-
-        dispatch(commentActions.addCommentBK(post_id, comment_text));
+        dispatch(commentActions.addCommentBK(props.post_id, comment_text));
         setCommentText("");
     }
 

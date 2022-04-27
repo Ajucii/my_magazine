@@ -2,6 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Grid, Text, Button } from "../elements";
 import { history } from "../redux/configStore"
 import { actionCreators as userActions } from "../redux/modules/user";
+import NotiBadge from "./NotiBadge";
 
 
 const Header = () => {
@@ -19,6 +20,7 @@ const Header = () => {
                 <Grid>
                     <Text margin="0px" size="24px" bold><a style={{ color: "black", fontStyle: "italic" }} href="/">MyMag</a></Text>
                 </Grid>
+                <NotiBadge _onClick={() => history.push("/noti")} />
 
                 <Grid is_flex width="auto">
                     <Button width="70px" _onClick={() => dispatch(userActions.logOutBK())} text="로그아웃"></Button>
